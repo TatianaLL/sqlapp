@@ -5,36 +5,30 @@ namespace sqlapp.Services
 {
 
     // This service will interact with our Product data in the SQL database
-    public class ProductService
+    public class ProductService : IProductService
     {
-        private static string db_source = "tl-test-db-2023.database.windows.net";
-        private static string db_user = "sqladmin";
-        private static string db_password = "Welcome1";
-        private static string db_database = "tl_test_2023";
+        private readonly IConfiguration _configuration;
 
-        
-
-
-    private SqlConnection GetConnection()
+        public ProductService(IConfiguration configuration)
         {
-            
-            var _builder = new SqlConnectionStringBuilder();
-            _builder.DataSource = db_source;
-            _builder.UserID = db_user;
-            _builder.Password = db_password;
-            _builder.InitialCatalog = db_database;
-            return new SqlConnection(_builder.ConnectionString);
+            _configuration = configuration;
+        }
+
+
+        private SqlConnection GetConnection()
+        {
+            return new SqlConnection(_configuration.GetConnectionString("SQLConnection"));
         }
         public List<Product> GetProducts()
         {
             List<Product> _product_lst = new List<Product>();
             string _statement = "SELECT ProductID,ProductName,Quantity from Products";
             SqlConnection _connection = GetConnection();
-            
+
             _connection.Open();
-            
+
             SqlCommand _sqlcommand = new SqlCommand(_statement, _connection);
-            
+
             using (SqlDataReader _reader = _sqlcommand.ExecuteReader())
             {
                 while (_reader.Read())
